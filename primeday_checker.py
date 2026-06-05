@@ -63,11 +63,11 @@ def parse_price(val) -> float | None:
         return None
 
 
-def find_header_row(df_raw: pd.DataFrame, markers: list[str]) -> int:
+def find_header_row(df_raw: pd.DataFrame, markers) -> int:
     """Encuentra la fila de cabecera buscando columnas clave."""
     for i in range(min(10, len(df_raw))):
-        row = df_raw.iloc[i].astype(str).str.upper().str.strip()
-        if all(any(m.upper() in cell for cell in row) for m in markers):
+        cells = [str(c).upper().strip() for c in df_raw.iloc[i].tolist()]
+        if all(any(m.upper() in cell for cell in cells) for m in markers):
             return i
     return 0
 
@@ -82,7 +82,7 @@ def read_excel_sheet(file_bytes, sheet_name=0) -> pd.DataFrame:
     )
 
 
-def col_by_pattern(columns: list[str], pattern: str) -> int | None:
+def col_by_pattern(columns, pattern: str):
     """Devuelve el índice de la primera columna que cumple el patrón regex."""
     for i, c in enumerate(columns):
         if re.search(pattern, str(c), re.IGNORECASE):
@@ -343,23 +343,26 @@ if f_draft:
     c1.success("✓ Draft cargado")
 else:
     c1.info("⬆ Pendiente draft")
-
 if f_nac:
     c2.success("✓ Nacional cargada")
 else:
     c2.info("⬆ Pendiente nacional")
-
 if f_inter:
     c3.success("✓ Inter cargada")
 else:
     c3.info("⬆ Pendiente internacional")
 
+# Leer bytes antes del botón para evitar stream exhausto en caché
+draft_bytes = f_draft.read() if f_draft else None
+nac_bytes   = f_nac.read()   if f_nac   else None
+inter_bytes = f_inter.read() if f_inter else None
+
 # ── Ejecución ────────────────────────────────
 if run_btn:
     with st.spinner("Cargando y procesando ficheros..."):
-        draft_df  = load_draft(f_draft.read())
-        nac_map   = load_nacional(f_nac.read())
-        inter_maps= load_internacional(f_inter.read())
+        draft_df   = load_draft(draft_bytes)
+        nac_map    = load_nacional(nac_bytes)
+        inter_maps = load_internacional(inter_bytes)
 
     st.success(f"Tarifas internacionales: {len(inter_maps)} pestañas reconocidas → {', '.join(sorted(inter_maps.keys()))}")
 
