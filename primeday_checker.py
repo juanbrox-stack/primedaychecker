@@ -339,9 +339,20 @@ with st.sidebar:
 
 # ── Estado de carga ──────────────────────────
 c1, c2, c3 = st.columns(3)
-c1.success("✓ Draft cargado"   ) if f_draft else c1.info("⬆ Pendiente draft")
-c2.success("✓ Nacional cargada") if f_nac   else c2.info("⬆ Pendiente nacional")
-c3.success("✓ Inter cargada"  ) if f_inter  else c3.info("⬆ Pendiente internacional")
+if f_draft:
+    c1.success("✓ Draft cargado")
+else:
+    c1.info("⬆ Pendiente draft")
+
+if f_nac:
+    c2.success("✓ Nacional cargada")
+else:
+    c2.info("⬆ Pendiente nacional")
+
+if f_inter:
+    c3.success("✓ Inter cargada")
+else:
+    c3.info("⬆ Pendiente internacional")
 
 # ── Ejecución ────────────────────────────────
 if run_btn:
